@@ -1,14 +1,14 @@
 "use client";
 
 import { Slider } from '@/components/ui/slider';
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect ,useCallback} from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 import { removeBackground } from "@imgly/background-removal";
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion";
-import { Trash2, Copy, Upload, Download, Plus, X, ZoomIn,Droplet,Flip, ZoomOut, Undo, Redo, Sliders,CircleDot, RotateCw } from 'lucide-react';
+import { Trash2, Copy, Upload, Download, Plus,ZoomIn,Droplet, ZoomOut, Undo, Redo, Sliders,CircleDot, RotateCw } from 'lucide-react';
 import { Checkbox } from "@/components/ui/checkbox";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Switch } from "@/components/ui/switch";
@@ -24,28 +24,39 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 
+interface FontSelectorProps {
+  value: string;
+  onChange: (font: string) => void;
+}
+interface GoogleFont {
+  family: string;
+  // Add other properties if needed
+}
 
-const FontSelector = ({ value, onChange }) => {
-  const [fonts, setFonts] = useState([]);
+interface GoogleFontsResponse {
+  items: GoogleFont[];
+}
+const FontSelector = ({ value, onChange }:FontSelectorProps) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [isOpen, setIsOpen] = useState(false);
-  const dropdownRef = useRef(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  const [fonts, setFonts] = useState<string[]>([]);
 
   useEffect(() => {
     // Fetch fonts from Google Fonts API
     fetch('https://www.googleapis.com/webfonts/v1/webfonts?key=AIzaSyCG9LNdH6W6bOyR-lCDvM73wPNVpVkk0Tw')
       .then(response => response.json())
-      .then(data => {
-        setFonts(data.items.map(item => item.family));
+      .then((data: GoogleFontsResponse) => {
+        setFonts(data.items.map((item: GoogleFont) => item.family));
       });
 
     // Close dropdown when clicking outside
-    const handleClickOutside = (event) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
         setIsOpen(false);
       }
     };
-
+  
     document.addEventListener('mousedown', handleClickOutside);
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
@@ -66,10 +77,14 @@ const FontSelector = ({ value, onChange }) => {
     font.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const handleFontSelect = (font) => {
-    onChange(font);
-    setIsOpen(false);
-  };
+// ... existing code ...
+
+const handleFontSelect = (font: string) => {
+  onChange(font);
+  setIsOpen(false);
+};
+
+// ... rest of the code ...
 
   return (
     <div className="relative" ref={dropdownRef}>
@@ -107,10 +122,30 @@ const FontSelector = ({ value, onChange }) => {
     </div>
   );
 };
+interface TextItem {
+  id: number;
+  text: string;
+  fontFamily: string;
+  textColor: string;
+  gradientColor1: string;
+  gradientColor2: string;
+  useGradient: boolean;
+  xPosition: number;
+  yPosition: number;
+  textSize: number;
+  fontWeight: number;
+  textOpacity: number;
+  isReversed: boolean;
+  rotation: number;
+  isForeground: boolean;
+}
+
+type HistoryEntry = TextItem[];
+
 const ImageEditorPage = () => {
-  const [originalImage, setOriginalImage] = useState(null);
-  const [processedImage, setProcessedImage] = useState(null);
-  const [items, setItems] = useState([]);
+  const [originalImage, setOriginalImage] = useState<string | null>(null);
+  const [processedImage, setProcessedImage] = useState<string | null>(null);
+  const [items, setItems] = useState<TextItem[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isRemovingBackground, setIsRemovingBackground] = useState(false);
   const [error, setError] = useState(null);
@@ -119,32 +154,17 @@ const ImageEditorPage = () => {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [showClearAllDialog, setShowClearAllDialog] = useState(false);
   const [zoom, setZoom] = useState(1);
-  const [history, setHistory] = useState([]);
+  const [history, setHistory] = useState<HistoryEntry[]>([]);
   const [historyIndex, setHistoryIndex] = useState(-1);
   const [filter, setFilter] = useState({ name: 'none', value: 100 });
   const [applyFilterTo, setApplyFilterTo] = useState({ background: true, foreground: true });
   const [isFilterOpen, setIsFilterOpen] = useState(false);
-  const canvasRef = useRef(null);
-  const fileInputRef = useRef(null);
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
 
   const [dominantColors, setDominantColors] = useState<string[]>([]);
-  useEffect(() => {
-    const loadFonts = async () => {
-      const fontFamilies = items.map(item => item.fontFamily).filter((v, i, a) => a.indexOf(v) === i);
-      for (const font of fontFamilies) {
-        const link = document.createElement('link');
-        link.href = `https://fonts.googleapis.com/css?family=${font.replace(' ', '+')}`;
-        link.rel = 'stylesheet';
-        document.head.appendChild(link);
-
-        // Wait for the font to load
-        await document.fonts.load(`12px "${font}"`);
-      }
-    };
-
-    loadFonts();
-  }, [items]);
+ 
   const extractColors = (imageUrl: string) => {
     const img = new Image();
     img.crossOrigin = 'Anonymous';
@@ -153,11 +173,15 @@ const ImageEditorPage = () => {
     img.onload = () => {
       const canvas = document.createElement('canvas');
       const ctx = canvas.getContext('2d');
+      if (!ctx) {
+        console.error('Failed to get 2D context');
+        return;
+      }
       canvas.width = img.width;
       canvas.height = img.height;
       ctx.drawImage(img, 0, 0, img.width, img.height);
       
-      const colors = [];
+      const colors: string[] = []; // Explicitly type the colors array
       const samplePoints = [
         [0, 0], [0.5, 0], [1, 0],
         [0, 0.5], [0.5, 0.5], [1, 0.5],
@@ -170,7 +194,7 @@ const ImageEditorPage = () => {
           Math.floor(y * img.height),
           1, 1
         ).data;
-        const color = `#${[...pixelData.slice(0, 3)].map(x => x.toString(16).padStart(2, '0')).join('')}`;
+        const color = `#${Array.from(pixelData.slice(0, 3)).map(x => x.toString(16).padStart(2, '0')).join('')}`;
         if (!colors.includes(color)) {
           colors.push(color);
         }
@@ -194,7 +218,7 @@ const ImageEditorPage = () => {
     setFlipVertical(!flipVertical);
   };
   const addNewItem = (width = 500, height = 500) => {
-    const newItem = {
+    const newItem: TextItem = {
       id: Date.now(),
       text: 'Sample Text',
       fontFamily: 'Inter',
@@ -209,19 +233,19 @@ const ImageEditorPage = () => {
       textOpacity: 1,
       isReversed: false,
       rotation: 0,
-      isForeground: false // New property
+      isForeground: false
     };
     setItems(prevItems => [...prevItems, newItem]);
     addToHistory([...items, newItem]);
   };
-  const toggleForeground = (id) => {
+  const toggleForeground = (id: number) => {
     const updatedItems = items.map(item =>
       item.id === id ? { ...item, isForeground: !item.isForeground } : item
     );
     setItems(updatedItems);
     addToHistory(updatedItems);
   };
-  const toggleGradient = (id) => {
+  const toggleGradient = (id: number) => {
     const updatedItems = items.map(item =>
       item.id === id ? { ...item, useGradient: !item.useGradient } : item
     );
@@ -229,7 +253,7 @@ const ImageEditorPage = () => {
     addToHistory(updatedItems);
   };
 
-  const toggleReverse = (id) => {
+  const toggleReverse = (id: number) => {
     const updatedItems = items.map(item =>
       item.id === id ? { ...item, isReversed: !item.isReversed } : item
     );
@@ -237,14 +261,14 @@ const ImageEditorPage = () => {
     addToHistory(updatedItems);
   };
 
-  const rotateText = (id, angle) => {
+  const rotateText = (id: number, angle: number) => {
     const updatedItems = items.map(item =>
       item.id === id ? { ...item, rotation: (item.rotation + angle) % 360 } : item
     );
     setItems(updatedItems);
     addToHistory(updatedItems);
   };
-  const updateItem = (id, field, value) => {
+  const updateItem = (id: number, field: keyof TextItem, value: TextItem[keyof TextItem]) => {
     const updatedItems = items.map(item => 
       item.id === id ? { ...item, [field]: value } : item
     );
@@ -252,13 +276,13 @@ const ImageEditorPage = () => {
     addToHistory(updatedItems);
   };
 
-  const deleteItem = (id) => {
+  const deleteItem = (id: number) => {
     const updatedItems = items.filter(item => item.id !== id);
     setItems(updatedItems);
     addToHistory(updatedItems);
   };
 
-  const duplicateItem = (id) => {
+  const duplicateItem = (id: number) => {
     const itemToDuplicate = items.find(item => item.id === id);
     if (itemToDuplicate) {
       const newItem = { ...itemToDuplicate, id: Date.now() };
@@ -268,7 +292,7 @@ const ImageEditorPage = () => {
     }
   };
 
-  const addToHistory = (newItems) => {
+  const addToHistory = (newItems: TextItem[]) => {
     const newHistory = history.slice(0, historyIndex + 1);
     newHistory.push(newItems);
     setHistory(newHistory);
@@ -289,59 +313,72 @@ const ImageEditorPage = () => {
     }
   };
 
-  const handleImageUpload = async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-  
-    setIsLoading(true);
-    setError(null);
-  
-    try {
-      const reader = new FileReader();
-      reader.onload = async (event) => {
-        setOriginalImage(event.target.result);
+ // ... existing code ...
+
+const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  if (!e.target.files || e.target.files.length === 0) return;
+
+  const file = e.target.files[0];
+  if (!file) return;
+
+  setIsLoading(true);
+  setError(null);
+
+  try {
+    const reader = new FileReader();
+    reader.onload = async (event: ProgressEvent<FileReader>) => {
+      if (event.target && event.target.result) {
+        setOriginalImage(event.target.result as string);
         const img = new Image();
         img.onload = () => {
           setImageWidth(img.width);
           setImageHeight(img.height);
           setIsLoading(false);
-          // Add new item with correct dimensions after image is loaded
           addNewItem(img.width, img.height);
-          extractColors(event.target.result as string);
+          if (event.target && event.target.result) {
+            extractColors(event.target.result as string);
+          }
         };
-        img.src = event.target.result;
-  
+        img.src = event.target.result as string;
+
         // Start background removal process
         setIsRemovingBackground(true);
         try {
-          const blob = await fetch(event.target.result).then(res => res.blob());
+          const blob = await fetch(event.target.result as string).then(res => res.blob());
           const removedBackground = await removeBackground(blob);
           const url = URL.createObjectURL(removedBackground);
           setProcessedImage(url);
-          // Removed addNewItem() from here
         } catch (err) {
           console.error('Error removing background:', err);
-          setError('Failed to remove background. Original image will be used.');
+         // setError('Failed to remove background. Original image will be used.');
         } finally {
           setIsRemovingBackground(false);
         }
-      };
-      reader.readAsDataURL(file);
-    } catch (err) {
-      console.error('Error processing image:', err);
-      setError('Failed to process image. Please try again.');
-      setIsLoading(false);
-    }
-  };
+      }
+    };
+    reader.readAsDataURL(file);
+  } catch (err) {
+    console.error('Error processing image:', err);
+    //setError('Failed to process image. Please try again.');
+    setIsLoading(false);
+  }
+};
 
-  const captureAndSaveImage = () => {
-    const canvas = canvasRef.current;
+// ... rest of the code ...
+
+const captureAndSaveImage = () => {
+  const canvas = canvasRef.current;
+  if (canvas) {
     const dataUrl = canvas.toDataURL('image/png');
     const link = document.createElement('a');
     link.download = 'edited_image.png';
     link.href = dataUrl;
     link.click();
-  };
+  } else {
+    console.error('Canvas is not available');
+    // Optionally, you can show an error message to the user here
+  }
+};
 
   const clearAllItems = () => {
     setShowClearAllDialog(true);
@@ -383,7 +420,7 @@ const ImageEditorPage = () => {
     setZoom(prevZoom => Math.max(prevZoom - 0.1, 0.1));
   };
 
-  const applyFilter = (ctx, filterName, filterValue) => {
+  const applyFilter = (ctx: CanvasRenderingContext2D, filterName: string, filterValue: number) => {
     switch (filterName) {
       case 'brightness':
         ctx.filter = `brightness(${filterValue}%)`;
@@ -408,10 +445,43 @@ const ImageEditorPage = () => {
   const toggleFilterSection = () => {
     setIsFilterOpen(!isFilterOpen);
   };
+
+  const drawText = useCallback((ctx: CanvasRenderingContext2D, isForeground: boolean) => {
+    items.forEach(item => {
+      if (item.isForeground === isForeground) {
+        ctx.save();
+        ctx.font = `${item.fontWeight} ${item.textSize * zoom}px "${item.fontFamily}"`;
+        ctx.globalAlpha = item.textOpacity;
+        
+        // Apply rotation
+        ctx.translate(item.xPosition * zoom, item.yPosition * zoom);
+        ctx.rotate(item.rotation * Math.PI / 180);
+        
+        // Apply reverse if needed
+        if (item.isReversed) {
+          ctx.scale(-1, 1);
+        }
+        
+        if (item.useGradient) {
+          const gradient = ctx.createLinearGradient(0, 0, ctx.measureText(item.text).width, 0);
+          gradient.addColorStop(0, item.gradientColor1);
+          gradient.addColorStop(1, item.gradientColor2);
+          ctx.fillStyle = gradient;
+        } else {
+          ctx.fillStyle = item.textColor;
+        }
+        
+        ctx.fillText(item.text, 0, 0);
+        ctx.restore();
+      }
+    });
+  }, [items,zoom]);
   useEffect(() => {
     if (originalImage) {
       const canvas = canvasRef.current;
+      if (!canvas) return;
       const ctx = canvas.getContext('2d');
+      if (!ctx) return;
       const img = new Image();
       img.onload = () => {
         canvas.width = img.width * zoom;
@@ -462,40 +532,11 @@ const ImageEditorPage = () => {
       };
       img.src = originalImage;
     }
-  }, [originalImage, processedImage, items, zoom, filter, applyFilterTo, flipHorizontal, flipVertical]);
+  }, [originalImage, processedImage, items, zoom, filter, applyFilterTo, flipHorizontal, flipVertical,drawText]);
 
   
   // Helper function to draw text
-  const drawText = (ctx, isForeground) => {
-    items.forEach(item => {
-      if (item.isForeground === isForeground) {
-        ctx.save();
-        ctx.font = `${item.fontWeight} ${item.textSize * zoom}px "${item.fontFamily}"`;
-        ctx.globalAlpha = item.textOpacity;
-        
-        // Apply rotation
-        ctx.translate(item.xPosition * zoom, item.yPosition * zoom);
-        ctx.rotate(item.rotation * Math.PI / 180);
-        
-        // Apply reverse if needed
-        if (item.isReversed) {
-          ctx.scale(-1, 1);
-        }
-        
-        if (item.useGradient) {
-          const gradient = ctx.createLinearGradient(0, 0, ctx.measureText(item.text).width, 0);
-          gradient.addColorStop(0, item.gradientColor1);
-          gradient.addColorStop(1, item.gradientColor2);
-          ctx.fillStyle = gradient;
-        } else {
-          ctx.fillStyle = item.textColor;
-        }
-        
-        ctx.fillText(item.text, 0, 0);
-        ctx.restore();
-      }
-    });
-  };
+  
 
   return (
     <div className="flex flex-col h-screen">
@@ -512,12 +553,12 @@ const ImageEditorPage = () => {
                  </Button>
         ) : (
           <Button 
-            className="bg-white text-black font-semibold rounded-lg px-4 py-2 shadow hover:bg-black hover:text-white transition duration-200 border-black" 
-            onClick={() => fileInputRef.current.click()}
-          >
-            <Upload className="inline mr-2 h-4 w-4" />
-            Upload Image
-          </Button>
+          className="bg-white text-black font-semibold rounded-lg px-4 py-2 shadow hover:bg-black hover:text-white transition duration-200 border-black" 
+          onClick={() => fileInputRef.current?.click()}
+        >
+          <Upload className="inline mr-2 h-4 w-4" />
+          Upload Image
+        </Button>
         )}
       </div>
       <Separator />
@@ -582,12 +623,12 @@ const ImageEditorPage = () => {
                 <Label>Apply Filter To</Label>
                 <div className="flex space-x-4">
                   <div className="flex items-center space-x-2">
-                    <Checkbox
-                      id="background"
-                      checked={applyFilterTo.background}
-                      onCheckedChange={(checked) => 
-                        setApplyFilterTo({ ...applyFilterTo, background: checked })
-                      }
+                  <Checkbox
+  id="background"
+  checked={applyFilterTo.background}
+  onCheckedChange={(checked) => 
+    setApplyFilterTo({ ...applyFilterTo, background: checked === true })
+                    }
                     />
                     <label htmlFor="background">Background</label>
                   </div>
@@ -596,7 +637,7 @@ const ImageEditorPage = () => {
                       id="foreground"
                       checked={applyFilterTo.foreground}
                       onCheckedChange={(checked) => 
-                        setApplyFilterTo({ ...applyFilterTo, foreground: checked })
+                        setApplyFilterTo({ ...applyFilterTo, foreground: checked === true })
                       }
                     />
                     <label htmlFor="foreground">Foreground</label>
@@ -679,7 +720,7 @@ const ImageEditorPage = () => {
                 <p className="mt-1 text-sm text-gray-500">Click to upload or drag and drop</p>
                 <Button 
                   className="mt-2" 
-                  onClick={() => fileInputRef.current.click()}
+                  onClick={() => fileInputRef.current?.click()}
                 >
                   Select Image
                 </Button>
@@ -708,10 +749,10 @@ const ImageEditorPage = () => {
         {originalImage && (
           <div className="w-1/4 p-4 overflow-y-auto bg-gray-100">
             <div className="flex items-center justify-between mb-4">
-              <Button onClick={addNewItem} className="flex items-center w-full">
-                <Plus className="mr-2 h-4 w-4" />
-                Add New Text
-              </Button>
+            <Button onClick={() => addNewItem()} className="flex items-center w-full">
+              <Plus className="mr-2 h-4 w-4" />
+              Add New Text
+            </Button>
               <Button 
                 onClick={clearAllItems} 
                 className="ml-2 p-2 text-red-500 hover:bg-red-100 rounded bg-white"
