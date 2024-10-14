@@ -14,13 +14,13 @@ import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover
 
 
 const firebaseConfig = {
-  apiKey: "AIzaSyAOTdrz_W0sCN7dlMsa-1zf1zmz6zwLsQw",
-  authDomain: "textualizeimage.firebaseapp.com",
-  projectId: "textualizeimage",
-  storageBucket: "textualizeimage.appspot.com",
-  messagingSenderId: "561481265139",
-  appId: "1:561481265139:web:d5e18f7070e6d73acfec86",
-  measurementId: "G-GSNCJ0T96Z"
+  apiKey: "AIzaSyA-ag9BCwGhFEsuAQSeG7MVis98xUhYJBU",
+  authDomain: "textinsideimage.firebaseapp.com",
+  projectId: "textinsideimage",
+  storageBucket: "textinsideimage.appspot.com",
+  messagingSenderId: "558991178680",
+  appId: "1:558991178680:web:959c2d6736ec94452d6d4d",
+  measurementId: "G-8QBQY4PZ14"
 };
 
 // Initialize Firebase
@@ -30,8 +30,8 @@ const provider = new GoogleAuthProvider();
 const LandingPage = () => {
   const router = useRouter();
   const images = [
-    '/images/life.png',
-    '/images/confident.png',
+    '/images/life.webp',
+    '/images/confident.webp',
   ];
   const [user, setUser] = useState<User | null>(null);
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
@@ -80,7 +80,7 @@ const LandingPage = () => {
     <div className="container mx-auto px-4 py-4 sm:py-8">
       {/* App Bar */}
       <div className="bg-white text-white p-4 flex justify-between items-center">
-        <h1 className="text-lg sm:text-xl font-bold text-black">Text Behind Image</h1>
+        <h1 className="text-lg sm:text-xl font-bold text-black">Text Inside Image</h1>
         {user ? (
          <div className="flex items-center">
           <span className="text-black mr-4">Welcome, {user.displayName}</span>
@@ -121,7 +121,7 @@ const LandingPage = () => {
               transition={{ duration: 0.5 }}
               className="text-3xl sm:text-4xl lg:text-6xl font-bold mb-4 text-black"
             >
-              Text Behind
+              Text Inside Iconsmage
               <br />
               Elevate Your Images with Striking Text
             </motion.h1>
@@ -190,7 +190,7 @@ const LandingPage = () => {
             className="relative col-span-2 row-span-2"
           >
             <Image 
-              src="/images/car.png"
+              src="/images/car.webp"
               alt="Car"
               fill
               style={{ objectFit: "cover" }}
@@ -206,7 +206,7 @@ const LandingPage = () => {
             className="relative col-span-2 row-span-1"
           >
             <Image 
-              src="/images/van.png"
+              src="/images/van.webp"
               alt="Confident"
               fill
               style={{ objectFit: "contain" }}
@@ -222,7 +222,7 @@ const LandingPage = () => {
             className="relative col-span-1 row-span-1"
           >
             <Image 
-              src="/images/go.png"
+              src="/images/go.webp"
               alt="Life"
               fill
               style={{ objectFit: "contain" }}
@@ -238,7 +238,7 @@ const LandingPage = () => {
             className="relative col-span-1 row-span-1"
           >
             <Image 
-              src="/images/drone.png"
+              src="/images/drone.webp"
               alt="Another Car"
               fill
               style={{ objectFit: "cover" }}

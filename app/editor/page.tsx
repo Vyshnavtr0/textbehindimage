@@ -23,7 +23,24 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { getAuth, onAuthStateChanged } from 'firebase/auth';
+import { useRouter } from 'next/navigation';
+import { initializeApp } from 'firebase/app';
 
+// Firebase configuration (make sure this matches your config in landing.tsx)
+const firebaseConfig = {
+  apiKey: "AIzaSyA-ag9BCwGhFEsuAQSeG7MVis98xUhYJBU",
+  authDomain: "textinsideimage.firebaseapp.com",
+  projectId: "textinsideimage",
+  storageBucket: "textinsideimage.appspot.com",
+  messagingSenderId: "558991178680",
+  appId: "1:558991178680:web:959c2d6736ec94452d6d4d",
+  measurementId: "G-8QBQY4PZ14"
+};
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
 interface FontSelectorProps {
   value: string;
   onChange: (font: string) => void;
@@ -164,7 +181,20 @@ const ImageEditorPage = () => {
 
 
   const [dominantColors, setDominantColors] = useState<string[]>([]);
- 
+  const router = useRouter();
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (!user) {
+        // User is not logged in, redirect to landing page
+        router.push('/');
+      }
+    });
+
+    // Cleanup subscription on unmount
+    return () => unsubscribe();
+  }, [router]);
+
   const extractColors = (imageUrl: string) => {
     const img = new Image();
     img.crossOrigin = 'Anonymous';

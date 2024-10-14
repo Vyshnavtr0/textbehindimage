@@ -14,8 +14,8 @@ const geistMono = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "Textualize Image",
-  description: "Textualize Image is a powerful tool for adding captivating text to images. Perfect for designers, marketers, and creators, it lets you customize fonts, colors, and placements to create stunning visuals.",
+  title: "Text Inside Image",
+  description: "TEXTINSIDEIMAGE is a powerful tool for adding captivating text to images. Perfect for designers, marketers, and creators, it lets you customize fonts, colors, and placements to create stunning visuals.",
 };
 
 export default function RootLayout({
