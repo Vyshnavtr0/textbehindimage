@@ -121,7 +121,7 @@ const LandingPage = () => {
               transition={{ duration: 0.5 }}
               className="text-3xl sm:text-4xl lg:text-6xl font-bold mb-4 text-black"
             >
-              Text Inside Iconsmage
+              Text Inside Image
               <br />
               Elevate Your Images with Striking Text
             </motion.h1>
@@ -255,6 +255,16 @@ const LandingPage = () => {
             <div className="mb-4 sm:mb-0">
               <p className="text-gray-600 text-sm sm:text-base">Created by Vyshnav TR</p>
             </div>
+            <a href="https://www.buymeacoffee.com/vyshnav.tr" target="_blank">
+            <Image 
+  src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" 
+  alt="Buy Me A Coffee" 
+  width={217}
+  height={60}
+  className="h-10 w-auto"
+  unoptimized
+/>
+              </a>
             <div className="flex space-x-4">
               <a href="https://x.com/vyshnav_tr_?t=Qk-a0kwEArQKBJvd5-zR-Q&s=08" target="_blank" rel="noopener noreferrer" className="text-gray-600 hover:text-gray-800">
                 <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">

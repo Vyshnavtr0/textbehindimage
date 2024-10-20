@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import { Slider } from '@/components/ui/slider';
 import React, { useState, useRef, useEffect ,useCallback} from 'react';
@@ -572,8 +572,12 @@ const captureAndSaveImage = () => {
     <div className="flex flex-col h-screen">
       {/* App Bar */}
       <div className="bg-white text-white p-4 flex justify-between items-center">
+
         <h1 className="text-xl font-bold text-black">Text Behind Image</h1>
+ 
         {originalImage ? (
+          <div className="flex items-center space-x-2">
+                 
                    <Button 
                    className="bg-white text-black font-semibold rounded-lg px-4 py-2 shadow hover:bg-black hover:text-white transition duration-200 border-2 border-black"
                    onClick={captureAndSaveImage}
@@ -581,7 +585,17 @@ const captureAndSaveImage = () => {
                    <Download className="inline mr-2 h-4 w-4" />
                    Download Image
                  </Button>
+                 <a href="https://www.buymeacoffee.com/vyshnav.tr" target="_blank" rel="noopener noreferrer">
+                 <img 
+                   src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" 
+                   alt="Buy Me A Coffee" 
+                   style={{ height: '40px', width: 'auto' }}
+                 />
+               </a>
+          </div>
         ) : (
+          <div className="flex items-center space-x-2">
+          
           <Button 
           className="bg-white text-black font-semibold rounded-lg px-4 py-2 shadow hover:bg-black hover:text-white transition duration-200 border-black" 
           onClick={() => fileInputRef.current?.click()}
@@ -589,6 +603,14 @@ const captureAndSaveImage = () => {
           <Upload className="inline mr-2 h-4 w-4" />
           Upload Image
         </Button>
+        <a href="https://www.buymeacoffee.com/vyshnav.tr" target="_blank" rel="noopener noreferrer">
+                 <img 
+                   src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" 
+                   alt="Buy Me A Coffee" 
+                   style={{ height: '40px', width: 'auto' }}
+                 />
+               </a>
+        </div>
         )}
       </div>
       <Separator />
@@ -696,7 +718,9 @@ const captureAndSaveImage = () => {
                 </Button>
                 
               </div>
-                      
+              <br />
+              <br />
+             
               </div>
             </div>
           </div>
