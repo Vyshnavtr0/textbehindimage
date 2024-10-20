@@ -587,7 +587,7 @@ const captureAndSaveImage = () => {
                  </Button>
                  <a href="https://www.buymeacoffee.com/vyshnav.tr" target="_blank" rel="noopener noreferrer">
                  <img 
-                   src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" 
+                   src="/images/default-yellow.png" 
                    alt="Buy Me A Coffee" 
                    style={{ height: '40px', width: 'auto' }}
                  />
@@ -605,7 +605,7 @@ const captureAndSaveImage = () => {
         </Button>
         <a href="https://www.buymeacoffee.com/vyshnav.tr" target="_blank" rel="noopener noreferrer">
                  <img 
-                   src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" 
+                   src="/images/default-yellow.png" 
                    alt="Buy Me A Coffee" 
                    style={{ height: '40px', width: 'auto' }}
                  />

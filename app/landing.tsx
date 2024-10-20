@@ -257,7 +257,7 @@ const LandingPage = () => {
             </div>
             <a href="https://www.buymeacoffee.com/vyshnav.tr" target="_blank">
             <Image 
-  src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" 
+  src="/images/default-yellow.png" 
   alt="Buy Me A Coffee" 
   width={217}
   height={60}
