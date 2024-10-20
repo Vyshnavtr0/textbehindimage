@@ -573,7 +573,7 @@ const captureAndSaveImage = () => {
       {/* App Bar */}
       <div className="bg-white text-white p-4 flex justify-between items-center">
 
-        <h1 className="text-xl font-bold text-black">Text Behind Image</h1>
+        <h1 className="text-xl font-bold text-black">Text Inside Image</h1>
  
         {originalImage ? (
           <div className="flex items-center space-x-2">
